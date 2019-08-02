@@ -21,7 +21,7 @@ const (
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
 	r.HandleFunc(fmt.Sprintf("/%s/transactions", storeName), transactionHandler(cliCtx, storeName)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/cuser", storeName), createUserHandler(cliCtx)).Methods("POST")
-	r.HandleFunc(fmt.Sprintf("/%s/accounts/{address}/transfers", storeName), SendRequestHandlerFn(cliCtx))
+	r.HandleFunc(fmt.Sprintf("/%s/accounts/{address}/transfers", storeName), SendRequestHandlerFn(cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), namesHandler(cliCtx, storeName)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), buyNameHandler(cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), setNameHandler(cliCtx)).Methods("PUT")
