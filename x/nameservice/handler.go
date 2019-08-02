@@ -2,6 +2,8 @@ package nameservice
 
 import (
 	"fmt"
+	"github.com/BigCodilo/sdk-application-tutorial/x/nameservice/types"
+	//sendKeeper "github.com/cosmos/cosmos-sdk/x/bank/internal/keeper"
 	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -13,8 +15,12 @@ func NewHandler(keeper Keeper) sdk.Handler {
 		switch msg := msg.(type) {
 		case MsgSetName:
 			return handleMsgSetName(ctx, keeper, msg)
+		case MsgCreateUser:
+			return handleMsgCreateUser(ctx, keeper, msg)
 		case MsgBuyName:
 			return handleMsgBuyName(ctx, keeper, msg)
+		case MsgSend:
+			return handleMsgSend(ctx, keeper, msg)
 		default:
 			errMsg := fmt.Sprintf("Unrecognized nameservice Msg type: %v", msg.Type())
 			return sdk.ErrUnknownRequest(errMsg).Result()
@@ -58,12 +64,40 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg MsgBuyName) sdk.Result
 	return sdk.Result{}
 }
 
+//--------------------HANDLER-FOR-CREATING-USER------------//
+
 func handleMsgCreateUser(ctx sdk.Context, keeper Keeper, msg MsgCreateUser) sdk.Result {
 	keeper.CreateUser(ctx, msg.PubKeyBech32)
 
 	SaveLocalTx(ctx, keeper, msg)
 	return sdk.Result{}
 }
+
+//---------------------HANDLER-FOR-SENDING-COINS-----------//
+
+// Handle MsgSend.
+func handleMsgSend(ctx sdk.Context, keeper Keeper, msg types.MsgSend) sdk.Result {
+	if !keeper.coinKeeper.GetSendEnabled(ctx) {
+		return sdk.ErrInsufficientCoins("Buyer does not have enough coins").Result()
+	}
+
+	err := keeper.coinKeeper.SendCoins(ctx, msg.FromAddress, msg.ToAddress, msg.Amount)
+	if err != nil {
+		return err.Result()
+	}
+
+	ctx.EventManager().EmitEvent(
+		sdk.NewEvent(
+			sdk.EventTypeMessage,
+			sdk.NewAttribute(sdk.AttributeKeyModule, "bank"),
+		),
+	)
+
+	SaveLocalTx(ctx, keeper, msg)
+
+	return sdk.Result{Events: ctx.EventManager().Events()}
+}
+
 
 func SaveLocalTx(ctx sdk.Context, keeper Keeper, msg sdk.Msg){
 	lastTxNumber := keeper.GetNumberLastTx(ctx)

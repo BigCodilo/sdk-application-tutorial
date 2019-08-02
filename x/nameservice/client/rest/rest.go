@@ -20,12 +20,52 @@ const (
 // RegisterRoutes - Central function to define routes that get registered by the main application
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
 	r.HandleFunc(fmt.Sprintf("/%s/transactions", storeName), transactionHandler(cliCtx, storeName)).Methods("GET")
-	r.HanldeFunc(fmt.Sprintf("/%s/cuser", storeName), createUserHandler(cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/%s/cuser", storeName), createUserHandler(cliCtx)).Methods("POST")
+	r.HandleFunc(fmt.Sprintf("/%s/accounts/{address}/transfers", storeName), SendRequestHandlerFn(cliCtx))
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), namesHandler(cliCtx, storeName)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), buyNameHandler(cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), setNameHandler(cliCtx)).Methods("PUT")
 	r.HandleFunc(fmt.Sprintf("/%s/names/{%s}", storeName, restName), resolveNameHandler(cliCtx, storeName)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/names/{%s}/whois", storeName, restName), whoIsHandler(cliCtx, storeName)).Methods("GET")
+}
+
+//--------------------SEND COINS HANDLER---------------------------//
+
+type SendReq struct {
+	BaseReq rest.BaseReq `json:"base_req" yaml:"base_req"`
+	Amount  sdk.Coins    `json:"amount" yaml:"amount"`
+}
+
+func SendRequestHandlerFn(cliCtx context.CLIContext) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		bech32Addr := vars["address"]
+
+		toAddr, err := sdk.AccAddressFromBech32(bech32Addr)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		var req SendReq
+		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
+			return
+		}
+
+		req.BaseReq = req.BaseReq.Sanitize()
+		if !req.BaseReq.ValidateBasic(w) {
+			return
+		}
+
+		fromAddr, err := sdk.AccAddressFromBech32(req.BaseReq.From)
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+
+		msg := types.NewMsgSend(fromAddr, toAddr, req.Amount)
+		utils.WriteGenerateStdTxResponse(w, cliCtx, req.BaseReq, []sdk.Msg{msg})
+	}
 }
 
 //--------------------CREATING USER HANDLER------------------------//

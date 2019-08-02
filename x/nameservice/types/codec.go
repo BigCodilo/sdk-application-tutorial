@@ -14,5 +14,6 @@ func init() {
 func RegisterCodec(cdc *codec.Codec) {
 	cdc.RegisterConcrete(MsgSetName{}, "nameservice/SetName", nil)
 	cdc.RegisterConcrete(MsgBuyName{}, "nameservice/BuyName", nil)
-	cdc.RegisterConcrete(MsgBuyName{}, "nameservice/CreateUser", nil)
+	cdc.RegisterConcrete(MsgCreateUser{}, "nameservice/CreateUser", nil)
+	cdc.RegisterConcrete(MsgSend{}, "nameservice/Send", nil)
 }
