@@ -94,3 +94,37 @@ func (msg MsgBuyName) GetSignBytes() []byte {
 func (msg MsgBuyName) GetSigners() []sdk.AccAddress {
 	return []sdk.AccAddress{msg.Buyer}
 }
+
+//----------------------MESSAGE-FOR-CREATING-USER----------------------//
+
+type MsgCreateUser struct{
+	PubKeyBech32 string `json:"pub_bech32"`
+}
+
+func NewMsgCreateUser (pubKeyBech32 string) MsgCreateUser{
+	return MsgCreateUser{PubKeyBech32:pubKeyBech32}
+}
+
+// Route should return the name of the module
+func (msg MsgCreateUser) Route() string { return RouterKey }
+
+// Type should return the action
+func (msg MsgCreateUser) Type() string { return "create_user" }
+
+// ValidateBasic runs stateless checks on the message
+func (msg MsgCreateUser) ValidateBasic() sdk.Error {
+	if len(msg.PubKeyBech32) < 1{
+		return sdk.ErrInvalidPubKey(msg.PubKeyBech32)
+	}
+	return nil
+}
+
+// GetSignBytes encodes the message for signing
+func (msg MsgCreateUser) GetSignBytes() []byte {
+	return sdk.MustSortJSON(ModuleCdc.MustMarshalJSON(msg))
+}
+
+// GetSigners defines whose signature is required
+func (msg MsgCreateUser) GetSigners() []sdk.AccAddress {
+	return nil //I dont know what must e here
+}

@@ -58,6 +58,13 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg MsgBuyName) sdk.Result
 	return sdk.Result{}
 }
 
+func handleMsgCreateUser(ctx sdk.Context, keeper Keeper, msg MsgCreateUser) sdk.Result {
+	keeper.CreateUser(ctx, msg.PubKeyBech32)
+
+	SaveLocalTx(ctx, keeper, msg)
+	return sdk.Result{}
+}
+
 func SaveLocalTx(ctx sdk.Context, keeper Keeper, msg sdk.Msg){
 	lastTxNumber := keeper.GetNumberLastTx(ctx)
 	keeper.SetTX(ctx, string(lastTxNumber + 1), TxsDump{lastTxNumber + 1,	msg.Type() , time.Now(), msg})

@@ -79,7 +79,7 @@ func (k Keeper) GetAllTxs(ctx sdk.Context) []TxsDump{
 //-------------------PART FOR ADDING ACCOUNTS-----------------//
 
 //Func that will creat account
-func (k Keeper) CreateAccount (ctx sdk.Context, pubKeyBech32 string){
+func (k Keeper) CreateUser (ctx sdk.Context, pubKeyBech32 string){
 	newAccount := types.BaseAccount{}
 	pubKey, err := sdk.GetAccPubKeyBech32(pubKeyBech32)
 	if err != nil{
@@ -183,7 +183,7 @@ func (k Keeper) SetPrice(ctx sdk.Context, name string, price sdk.Coins) {
 func (k Keeper) GetNamesIterator(ctx sdk.Context) sdk.Iterator {
 	//fmt.Println(k.GetAllTxs(ctx))
 	fmt.Println("we are here")
-	//k.CreateAccount(ctx, "cosmospub1addwnpepqw5s0r974af843allmdcy6pae8rnnzjqqsnq2qkjsccy8axgk6aewm2qkr6")
+	//k.CreateUser(ctx, "cosmospub1addwnpepqw5s0r974af843allmdcy6pae8rnnzjqqsnq2qkjsccy8axgk6aewm2qkr6")
 	fmt.Println(k.accKeeper.GetAllAccounts(ctx))
 	//k.GetAccount(ctx)
 	store := ctx.KVStore(k.storeKey)

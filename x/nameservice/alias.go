@@ -13,6 +13,7 @@ const (
 var (
 	NewMsgBuyName = types.NewMsgBuyName
 	NewMsgSetName = types.NewMsgSetName
+	NewMsgCreateUser = types.NewMsgCreateUser
 	NewWhois      = types.NewWhois
 	ModuleCdc     = types.ModuleCdc
 	RegisterCodec = types.RegisterCodec
@@ -22,6 +23,7 @@ var (
 type (
 	MsgSetName      = types.MsgSetName
 	MsgBuyName      = types.MsgBuyName
+	MsgCreateUser   = types.MsgCreateUser
 	//Account 		= types.Account
 	QueryResResolve = types.QueryResResolve
 	QueryResNames   = types.QueryResNames

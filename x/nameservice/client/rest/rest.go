@@ -20,11 +20,41 @@ const (
 // RegisterRoutes - Central function to define routes that get registered by the main application
 func RegisterRoutes(cliCtx context.CLIContext, r *mux.Router, storeName string) {
 	r.HandleFunc(fmt.Sprintf("/%s/transactions", storeName), transactionHandler(cliCtx, storeName)).Methods("GET")
+	r.HanldeFunc(fmt.Sprintf("/%s/cuser", storeName), createUserHandler(cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), namesHandler(cliCtx, storeName)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), buyNameHandler(cliCtx)).Methods("POST")
 	r.HandleFunc(fmt.Sprintf("/%s/names", storeName), setNameHandler(cliCtx)).Methods("PUT")
 	r.HandleFunc(fmt.Sprintf("/%s/names/{%s}", storeName, restName), resolveNameHandler(cliCtx, storeName)).Methods("GET")
 	r.HandleFunc(fmt.Sprintf("/%s/names/{%s}/whois", storeName, restName), whoIsHandler(cliCtx, storeName)).Methods("GET")
+}
+
+//--------------------CREATING USER HANDLER------------------------//
+
+type createUserReq struct{
+	BaseReq rest.BaseReq `json:"base_req"`
+	pubKeyBech32 string `json:"pub_bech32"`
+}
+
+func createUserHandler(cliCtx context.CLIContext) http.HandlerFunc{
+	return func (w http.ResponseWriter, r *http.Request){
+		var req createUserReq
+		if !rest.ReadRESTReq(w, r, cliCtx.Codec, &req) {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, "failed to parse request")
+			return
+		}
+		baseReq := req.BaseReq.Sanitize()
+		if !baseReq.ValidateBasic(w){
+			fmt.Println("error in validation base request")
+			return
+		}
+		msg := types.MsgCreateUser{PubKeyBech32: req.pubKeyBech32}
+		err := msg.ValidateBasic()
+		if err != nil {
+			rest.WriteErrorResponse(w, http.StatusBadRequest, err.Error())
+			return
+		}
+		utils.WriteGenerateStdTxResponse(w, cliCtx, baseReq, []sdk.Msg{msg})
+	}
 }
 
 // --------------------------------------------------------------------------------------
