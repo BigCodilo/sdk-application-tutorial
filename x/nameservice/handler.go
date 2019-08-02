@@ -2,6 +2,7 @@ package nameservice
 
 import (
 	"fmt"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -27,6 +28,9 @@ func handleMsgSetName(ctx sdk.Context, keeper Keeper, msg MsgSetName) sdk.Result
 		return sdk.ErrUnauthorized("Incorrect Owner").Result() // If not, throw an error
 	}
 	keeper.SetName(ctx, msg.Name, msg.Value) // If so, set the name to the value specified in the msg.
+
+	SaveLocalTx(ctx, keeper, msg)
+
 	return sdk.Result{}                      // return
 }
 
@@ -48,5 +52,13 @@ func handleMsgBuyName(ctx sdk.Context, keeper Keeper, msg MsgBuyName) sdk.Result
 	}
 	keeper.SetOwner(ctx, msg.Name, msg.Buyer)
 	keeper.SetPrice(ctx, msg.Name, msg.Bid)
+
+	SaveLocalTx(ctx, keeper, msg)
+
 	return sdk.Result{}
+}
+
+func SaveLocalTx(ctx sdk.Context, keeper Keeper, msg sdk.Msg){
+	lastTxNumber := keeper.GetNumberLastTx(ctx)
+	keeper.SetTX(ctx, string(lastTxNumber + 1), TxsDump{lastTxNumber + 1,	msg.Type() , time.Now(), msg})
 }

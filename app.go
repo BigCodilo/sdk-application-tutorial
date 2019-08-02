@@ -81,6 +81,7 @@ type nameServiceApp struct {
 	keyDistr    *sdk.KVStoreKey
 	tkeyDistr   *sdk.TransientStoreKey
 	keyNS       *sdk.KVStoreKey
+	keyTHistory	*sdk.KVStoreKey
 	keyParams   *sdk.KVStoreKey
 	tkeyParams  *sdk.TransientStoreKey
 	keySlashing *sdk.KVStoreKey
@@ -121,6 +122,7 @@ func NewNameServiceApp(logger log.Logger, db dbm.DB) *nameServiceApp {
 		keyDistr:    sdk.NewKVStoreKey(distr.StoreKey),
 		tkeyDistr:   sdk.NewTransientStoreKey(distr.TStoreKey),
 		keyNS:       sdk.NewKVStoreKey(nameservice.StoreKey),
+		keyTHistory: sdk.NewKVStoreKey("txs"),
 		keyParams:   sdk.NewKVStoreKey(params.StoreKey),
 		tkeyParams:  sdk.NewTransientStoreKey(params.TStoreKey),
 		keySlashing: sdk.NewKVStoreKey(slashing.StoreKey),
@@ -201,6 +203,8 @@ func NewNameServiceApp(logger log.Logger, db dbm.DB) *nameServiceApp {
 		app.bankKeeper,
 		app.keyNS,
 		app.cdc,
+		app.keyTHistory,
+		app.accountKeeper,
 	)
 
 	app.mm = module.NewManager(
@@ -257,6 +261,7 @@ func NewNameServiceApp(logger log.Logger, db dbm.DB) *nameServiceApp {
 		app.tkeyDistr,
 		app.keySlashing,
 		app.keyNS,
+		app.keyTHistory,
 		app.keyParams,
 		app.tkeyParams,
 	)

@@ -1,6 +1,7 @@
 package nameservice
 
 import (
+	"fmt"
 	"github.com/cosmos/cosmos-sdk/codec"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
@@ -12,6 +13,7 @@ const (
 	QueryResolve = "resolve"
 	QueryWhois   = "whois"
 	QueryNames   = "names"
+	QueryTransactions = "transactions"
 )
 
 // NewQuerier is the module level router for state queries
@@ -24,6 +26,8 @@ func NewQuerier(keeper Keeper) sdk.Querier {
 			return queryWhois(ctx, path[1:], req, keeper)
 		case QueryNames:
 			return queryNames(ctx, req, keeper)
+		case QueryTransactions:
+			return queryTransactions(ctx, req, keeper)
 		default:
 			return nil, sdk.ErrUnknownRequest("unknown nameservice query endpoint")
 		}
@@ -72,5 +76,17 @@ func queryNames(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, 
 		panic("could not marshal result to JSON")
 	}
 
+	return res, nil
+}
+
+// ---------------------PART FOR KVSTORE TXS-------------------------//
+
+func queryTransactions(ctx sdk.Context, req abci.RequestQuery, keeper Keeper) ([]byte, sdk.Error) {
+	txsList := keeper.GetAllTxs(ctx)
+	res, err := codec.MarshalJSONIndent(keeper.cdc, txsList)
+	if err != nil{
+		fmt.Println("Something wrong")
+	}
+	fmt.Println("GAGAGAGAGAGAGAGGAGAGAGAAAGAG")
 	return res, nil
 }

@@ -1,0 +1,5 @@
+package nameservice
+
+func Test() {
+
+}

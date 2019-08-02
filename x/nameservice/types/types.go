@@ -3,6 +3,7 @@ package types
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	sdk "github.com/cosmos/cosmos-sdk/types"
 )
@@ -30,3 +31,25 @@ func (w Whois) String() string {
 Value: %s
 Price: %s`, w.Owner, w.Value, w.Price))
 }
+
+//types for txs history
+type TxsDump struct{
+	Number  int
+	Type 	string
+	Time 	time.Time
+	Message sdk.Msg
+}
+
+//func NewTxsDump (name string, bid sdk.Coins, buyer sdk.AccAddress) TxsDump{
+//	return TxsDump{
+//		Name: name,
+//		Bid: bid,
+//		Buyer: buyer,
+//	}
+//}
+//
+//func (td TxsDump) String() string{
+//	return strings.TrimSpace(fmt.Sprintf(`Name: %s
+//		Bid: %s
+//		Buyer: %s`, td.Name, td.Bid, td.Buyer))
+//}
